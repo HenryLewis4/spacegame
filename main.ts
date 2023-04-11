@@ -1,24 +1,63 @@
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    projectile = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . 2 3 3 3 3 3 2 . . . . 
-        . . . . 3 1 1 1 1 1 1 1 3 . . . 
-        . . . . 1 1 1 1 1 1 1 1 1 . . . 
-        . . . 2 1 1 1 1 1 1 1 1 1 2 . . 
-        . . . 2 3 1 1 1 1 1 1 3 3 2 . . 
-        . . . . . . 2 2 2 2 2 . . . . . 
-        `, spaceship, 0, -100)
+namespace SpriteKind {
+    export const enemyProjectile = SpriteKind.create()
+}
+function checkYposition (valueY: number) {
+    if (valueY >= 90) {
+        return true
+    } else {
+        return false
+    }
+}
+sprites.onOverlap(SpriteKind.Player, SpriteKind.enemyProjectile, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    info.changeLifeBy(-1)
+    music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.UntilDone)
 })
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (!(yPositionLess)) {
+        projectile = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . 2 3 3 3 3 3 2 . . . . 
+            . . . . 3 1 1 1 1 1 1 1 3 . . . 
+            . . . . 1 1 1 1 1 1 1 1 1 . . . 
+            . . . 2 1 1 1 1 1 1 1 1 1 2 . . 
+            . . . 2 3 1 1 1 1 1 1 3 3 2 . . 
+            . . . . . . 2 2 2 2 2 . . . . . 
+            `, spaceship, 0, -100)
+        music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
+        pause(500)
+    }
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    sprites.destroy(sprite)
+    music.play(music.melodyPlayable(music.zapped), music.PlaybackMode.UntilDone)
+    destroyedIndex = list.indexOf(otherSprite)
+    list.removeAt(destroyedIndex)
+    if (list.length <= 0) {
+        game.splash("You Win!")
+        game.gameOver(true)
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
+    info.setLife(0)
+})
+let projectile2: Sprite = null
+let chosenPlane: Sprite = null
+let destroyedIndex = 0
 let projectile: Sprite = null
+let yPositionLess = false
+let enemyPlane: Sprite = null
+let list: Sprite[] = []
 let spaceship: Sprite = null
 spaceship = sprites.create(img`
     . . . . . . . c d . . . . . . . 
@@ -38,36 +77,74 @@ spaceship = sprites.create(img`
     c c c c c c e e 2 2 2 4 2 2 e e 
     c c c c c c e e 2 2 2 2 4 2 e e 
     `, SpriteKind.Player)
-spaceship.y = 100
+spaceship.y = 110
 controller.moveSprite(spaceship, 100, 0)
-let mySprite = sprites.create(img`
-    ....ffffff.........ccc..
-    ....ff22ccf.......cc4f..
-    .....ffccccfff...cc44f..
-    ....cc24442222cccc442f..
-    ...c9b4422222222cc422f..
-    ..c999b2222222222222fc..
-    .c2b99111b222222222c22c.
-    c222b111992222ccccccc22f
-    f222222222222c222ccfffff
-    .f2222222222442222f.....
-    ..ff2222222cf442222f....
-    ....ffffffffff442222c...
-    .........f2cfffc2222c...
-    .........fcc2ffffffff...
-    ..........fc2ffff.......
-    ...........fffff........
-    `, SpriteKind.Player)
-mySprite.setPosition(20, 11)
-mySprite.setVelocity(50, 0)
+spaceship.setStayInScreen(true)
+list = []
+info.setLife(3)
+for (let index = 0; index < 5; index++) {
+    enemyPlane = sprites.create(img`
+        ....ffffff.........ccc..
+        ....ff22ccf.......cc4f..
+        .....ffccccfff...cc44f..
+        ....cc24442222cccc442f..
+        ...c9b4422222222cc422f..
+        ..c999b2222222222222fc..
+        .c2b99111b222222222c22c.
+        c222b111992222ccccccc22f
+        f222222222222c222ccfffff
+        .f2222222222442222f.....
+        ..ff2222222cf442222f....
+        ....ffffffffff442222c...
+        .........f2cfffc2222c...
+        .........fcc2ffffffff...
+        ..........fc2ffff.......
+        ...........fffff........
+        `, SpriteKind.Enemy)
+    list.push(enemyPlane)
+}
+let lastXPosition = 20
+// I need to space the planes away from each other further 
+for (let value of list) {
+    value.setPosition(lastXPosition, 11)
+    lastXPosition += 30
+    value.setVelocity(50, 0)
+}
+game.onUpdateInterval(2000, function () {
+    chosenPlane = list._pickRandom()
+    projectile2 = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . 2 1 2 . . . . . . 
+        . . . . . . . 2 1 2 . . . . . . 
+        . . . . . . . 2 1 2 . . . . . . 
+        . . . . . . . 3 1 3 . . . . . . 
+        . . . . . . 2 3 1 3 2 . . . . . 
+        . . . . . . 2 1 1 1 2 . . . . . 
+        . . . . . . 2 1 1 1 3 . . . . . 
+        . . . . . . 3 1 1 1 3 . . . . . 
+        . . . . . . 3 1 1 1 3 . . . . . 
+        . . . . . . 3 1 1 1 3 . . . . . 
+        . . . . . . 2 3 1 3 2 . . . . . 
+        . . . . . . . 2 2 2 . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.enemyProjectile)
+    projectile2.setPosition(chosenPlane.x, chosenPlane.y)
+    projectile2.setVelocity(0, 100)
+})
 forever(function () {
-    if (mySprite.x > 150) {
-        mySprite.y += 10
-        mySprite.x += -10
-        mySprite.setVelocity(-50, 0)
-    } else if (mySprite.x < 15) {
-        mySprite.y += 10
-        mySprite.x += 10
-        mySprite.setVelocity(50, 0)
+    for (let value of list) {
+        if (value.x > 150) {
+            value.y += 20
+            value.x += -10
+            value.setVelocity(-50, 0)
+            checkYposition(value.y)
+        } else if (value.x < 15) {
+            value.y += 20
+            value.x += 10
+            value.setVelocity(50, 0)
+            yPositionLess = checkYposition(value.y)
+        }
     }
 })
