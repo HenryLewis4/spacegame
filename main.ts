@@ -41,9 +41,9 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     sprites.destroy(otherSprite)
     sprites.destroy(sprite)
     music.play(music.melodyPlayable(music.zapped), music.PlaybackMode.UntilDone)
-    destroyedIndex = list.indexOf(otherSprite)
-    list.removeAt(destroyedIndex)
-    if (list.length <= 0) {
+    destroyedIndex = enemyList.indexOf(otherSprite)
+    enemyList.removeAt(destroyedIndex)
+    if (enemyList.length <= 0) {
         game.splash("You Win!")
         game.gameOver(true)
     }
@@ -57,7 +57,7 @@ let destroyedIndex = 0
 let projectile: Sprite = null
 let enemyAtBottom = false
 let enemyPlane: Sprite = null
-let list: Sprite[] = []
+let enemyList: Sprite[] = []
 let spaceship: Sprite = null
 game.splash("Hit all the planes before they get to the bottom.")
 spaceship = sprites.create(img`
@@ -81,7 +81,7 @@ spaceship = sprites.create(img`
 spaceship.y = 110
 controller.moveSprite(spaceship, 100, 0)
 spaceship.setStayInScreen(true)
-list = []
+enemyList = []
 info.setLife(3)
 for (let index = 0; index < 5; index++) {
     enemyPlane = sprites.create(img`
@@ -102,17 +102,16 @@ for (let index = 0; index < 5; index++) {
         ..........fc2ffff.......
         ...........fffff........
         `, SpriteKind.Enemy)
-    list.push(enemyPlane)
+    enemyList.push(enemyPlane)
 }
 let lastXPosition = 20
-// I need to space the planes away from each other further 
-for (let value of list) {
+for (let value of enemyList) {
     value.setPosition(lastXPosition, 11)
     lastXPosition += 30
     value.setVelocity(50, 0)
 }
 game.onUpdateInterval(1000, function () {
-    chosenPlane = list._pickRandom()
+    chosenPlane = enemyList._pickRandom()
     projectile2 = sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . 2 1 2 . . . . . . 
@@ -135,7 +134,7 @@ game.onUpdateInterval(1000, function () {
     projectile2.setVelocity(0, 100)
 })
 forever(function () {
-    for (let value of list) {
+    for (let value of enemyList) {
         if (value.x > 150) {
             value.y += 20
             value.x += -10
