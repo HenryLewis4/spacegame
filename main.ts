@@ -14,7 +14,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.enemyProjectile, function (sprit
     music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.UntilDone)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (!(yPositionLess)) {
+    if (!(enemyAtBottom)) {
         projectile = sprites.createProjectileFromSprite(img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
@@ -55,10 +55,11 @@ let projectile2: Sprite = null
 let chosenPlane: Sprite = null
 let destroyedIndex = 0
 let projectile: Sprite = null
-let yPositionLess = false
+let enemyAtBottom = false
 let enemyPlane: Sprite = null
 let list: Sprite[] = []
 let spaceship: Sprite = null
+game.splash("Hit all the planes before they get to the bottom.")
 spaceship = sprites.create(img`
     . . . . . . . c d . . . . . . . 
     . . . . . . . c d . . . . . . . 
@@ -110,7 +111,7 @@ for (let value of list) {
     lastXPosition += 30
     value.setVelocity(50, 0)
 }
-game.onUpdateInterval(2000, function () {
+game.onUpdateInterval(1000, function () {
     chosenPlane = list._pickRandom()
     projectile2 = sprites.create(img`
         . . . . . . . . . . . . . . . . 
@@ -139,12 +140,12 @@ forever(function () {
             value.y += 20
             value.x += -10
             value.setVelocity(-50, 0)
-            checkYposition(value.y)
+            enemyAtBottom = checkYposition(value.y)
         } else if (value.x < 15) {
             value.y += 20
             value.x += 10
             value.setVelocity(50, 0)
-            yPositionLess = checkYposition(value.y)
+            enemyAtBottom = checkYposition(value.y)
         }
     }
 })
